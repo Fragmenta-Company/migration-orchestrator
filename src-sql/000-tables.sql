@@ -1,0 +1,46 @@
+CREATE TABLE IF NOT EXISTS backend.users (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  username VARCHAR(255) NOT NULL UNIQUE,
+  email TEXT NOT NULL UNIQUE,
+  password TEXT NOT NULL,
+  first_name VARCHAR(255) NOT NULL,
+  last_name VARCHAR(512) NOT NULL,
+  phone_number TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP NOT NULL DEFAULT now(),
+  deleted_at TIMESTAMP NULL DEFAULT NULL,
+  last_login TIMESTAMP NULL DEFAULT NULL
+);
+
+CREATE TABLE IF NOT EXISTS backend.roles (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name VARCHAR(255) NOT NULL UNIQUE,
+  description VARCHAR(1024) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS backend.user_roles (
+  user_id UUID NOT NULL REFERENCES backend.users(id) ON DELETE CASCADE,
+  role_id UUID NOT NULL REFERENCES backend.roles(id) ON DELETE CASCADE,
+  PRIMARY KEY (user_id, role_id),
+  created_at TIMESTAMP NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS backend.permissions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name VARCHAR(255) NOT NULL UNIQUE,
+  description VARCHAR(1024) NOT NULL,
+  entity VARCHAR(255) NOT NULL,
+  action VARCHAR(255) NOT NULL,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP NOT NULL DEFAULT now(),
+);
+
+CREATE TABLE IF NOT EXISTS backend.roles_permissions (
+  role_id UUID NOT NULL REFERENCES backend.roles(id) ON DELETE CASCADE,
+  permission_id UUID NOT NULL REFERENCES backend.permissions(id) ON DELETE CASCADE,
+  PRIMARY KEY (role_id, permission_id),
+  created_at TIMESTAMP NOT NULL DEFAULT now()
+);
