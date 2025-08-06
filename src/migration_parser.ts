@@ -3,11 +3,14 @@ import Migration from "./models/Migration.js";
 
 export default class MigrationParser {
   
-  constructor() {}
-  
   private static readonly _migrationRegex = /^--\s*\+migration:\s*(\w[\w\-]*)/;
   private static readonly _migrationRegexDescription = /^--\s*\+(.+)/;
   private static readonly _migrationEndRegex = /^--\s*\+endmigration/;
+  private static readonly _migrationRegexDependency = /^--\s*\+dependency:\s*(\w[\w\-]*)/;
+
+  public static async parseContent(content: string, filePath: string = 'in-memory'): Promise<Migration[]> {
+    return await this.parseSingle({ filePath, content });
+  }
 
   public static async parseMultiple(
     files: Map<string, string>
@@ -47,6 +50,7 @@ export default class MigrationParser {
       const startMatch = line.match(this._migrationRegex);
       const endMatch = line.match(this._migrationEndRegex);
       const descriptionMatch = line.match(this._migrationRegexDescription);
+      const dependencyMatch = line.match(this._migrationRegexDependency);
 
       if (startMatch) {
         if (insideMigration) {
@@ -61,11 +65,10 @@ export default class MigrationParser {
         );
         afterStart = true;
         insideMigration = true;
+      } else if(dependencyMatch && afterStart) {
+        currentMigration?.addDependency(dependencyMatch[1] ?? '');
       } else if(descriptionMatch && afterStart) {
-        if (!insideMigration || !currentMigration) {
-          throw new Error(`Unexpected description found outside migration`);
-        }
-        currentMigration.addToDescription(descriptionMatch[1] ?? '');
+        currentMigration?.addToDescription(descriptionMatch[1] ?? '');
       } else if (endMatch) {
         if (!insideMigration || !currentMigration) {
           throw new Error(`Unexpected endmigration found`);
@@ -80,8 +83,8 @@ export default class MigrationParser {
       }
     }
 
-    if (insideMigration) {
-      throw new Error(`File ended while inside migration: ${filePath}`);
+    if (insideMigration && currentMigration) {
+      throw new Error(`File ended while inside migration: '${currentMigration.name}' in ${filePath}`);
     }
 
     return migrations;
