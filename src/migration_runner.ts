@@ -22,6 +22,7 @@ export default class MigrationRunner {
     try {
       const client = await this.connection.connect();
       try {
+        console.log(`Executing migration: ${migration.name}`);
         await client.query(migration.sqlContent);
         console.log(`Migration ${migration.name} executed successfully.`);
         return true;
