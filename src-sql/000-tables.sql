@@ -1,3 +1,4 @@
+-- +migration: create_user_table
 CREATE TABLE IF NOT EXISTS backend.users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   username VARCHAR(255) NOT NULL UNIQUE,
@@ -11,7 +12,9 @@ CREATE TABLE IF NOT EXISTS backend.users (
   deleted_at TIMESTAMP NULL DEFAULT NULL,
   last_login TIMESTAMP NULL DEFAULT NULL
 );
+-- +endmigration
 
+-- +migration: create_roles_table
 CREATE TABLE IF NOT EXISTS backend.roles (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name VARCHAR(255) NOT NULL UNIQUE,
@@ -19,14 +22,18 @@ CREATE TABLE IF NOT EXISTS backend.roles (
   created_at TIMESTAMP NOT NULL DEFAULT now(),
   updated_at TIMESTAMP NOT NULL DEFAULT now()
 );
+-- +endmigration
 
+-- +migration: create_user_roles_table
 CREATE TABLE IF NOT EXISTS backend.user_roles (
   user_id UUID NOT NULL REFERENCES backend.users(id) ON DELETE CASCADE,
   role_id UUID NOT NULL REFERENCES backend.roles(id) ON DELETE CASCADE,
   PRIMARY KEY (user_id, role_id),
   created_at TIMESTAMP NOT NULL DEFAULT now()
 );
+-- +endmigration
 
+-- +migration: create_permissions_table
 CREATE TABLE IF NOT EXISTS backend.permissions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name VARCHAR(255) NOT NULL UNIQUE,
@@ -37,10 +44,13 @@ CREATE TABLE IF NOT EXISTS backend.permissions (
   created_at TIMESTAMP NOT NULL DEFAULT now(),
   updated_at TIMESTAMP NOT NULL DEFAULT now(),
 );
+-- +endmigration
 
+-- +migration: create_roles_permissions_table
 CREATE TABLE IF NOT EXISTS backend.roles_permissions (
   role_id UUID NOT NULL REFERENCES backend.roles(id) ON DELETE CASCADE,
   permission_id UUID NOT NULL REFERENCES backend.permissions(id) ON DELETE CASCADE,
   PRIMARY KEY (role_id, permission_id),
   created_at TIMESTAMP NOT NULL DEFAULT now()
 );
+-- +endmigration
