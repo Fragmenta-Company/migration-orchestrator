@@ -1,4 +1,5 @@
 -- +migration: create_user_table
+--+ Tabela utilizada para armazenar os usuários do sistema
 CREATE TABLE IF NOT EXISTS backend.users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   username VARCHAR(255) NOT NULL UNIQUE,
@@ -15,6 +16,7 @@ CREATE TABLE IF NOT EXISTS backend.users (
 -- +endmigration
 
 -- +migration: create_roles_table
+--+ Tabela utilizada para armazenar os papéis (roles) dos usuários
 CREATE TABLE IF NOT EXISTS backend.roles (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name VARCHAR(255) NOT NULL UNIQUE,
@@ -25,6 +27,7 @@ CREATE TABLE IF NOT EXISTS backend.roles (
 -- +endmigration
 
 -- +migration: create_user_roles_table
+--+ Tabela utilizada para armazenar a relação entre usuários e papéis (roles)
 CREATE TABLE IF NOT EXISTS backend.user_roles (
   user_id UUID NOT NULL REFERENCES backend.users(id) ON DELETE CASCADE,
   role_id UUID NOT NULL REFERENCES backend.roles(id) ON DELETE CASCADE,
@@ -34,6 +37,7 @@ CREATE TABLE IF NOT EXISTS backend.user_roles (
 -- +endmigration
 
 -- +migration: create_permissions_table
+--+ Tabela utilizada para armazenar as permissões do sistema
 CREATE TABLE IF NOT EXISTS backend.permissions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name VARCHAR(255) NOT NULL UNIQUE,
@@ -47,6 +51,7 @@ CREATE TABLE IF NOT EXISTS backend.permissions (
 -- +endmigration
 
 -- +migration: create_roles_permissions_table
+--+ Tabela utilizada para armazenar a relação entre papéis (roles) e permissões
 CREATE TABLE IF NOT EXISTS backend.roles_permissions (
   role_id UUID NOT NULL REFERENCES backend.roles(id) ON DELETE CASCADE,
   permission_id UUID NOT NULL REFERENCES backend.permissions(id) ON DELETE CASCADE,
