@@ -27,6 +27,8 @@ CREATE TABLE IF NOT EXISTS backend.roles (
 -- +endmigration
 
 -- +migration: create_user_roles_table
+--+ dependency: create_roles_table
+--+ dependency: create_user_table
 --+ Tabela utilizada para armazenar a relação entre usuários e papéis (roles)
 CREATE TABLE IF NOT EXISTS backend.user_roles (
   user_id UUID NOT NULL REFERENCES backend.users(id) ON DELETE CASCADE,
@@ -46,11 +48,12 @@ CREATE TABLE IF NOT EXISTS backend.permissions (
   action VARCHAR(255) NOT NULL,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP NOT NULL DEFAULT now(),
-  updated_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP NOT NULL DEFAULT now()
 );
 -- +endmigration
 
 -- +migration: create_roles_permissions_table
+-- +dependency: create_permissions_table
 --+ Tabela utilizada para armazenar a relação entre papéis (roles) e permissões
 CREATE TABLE IF NOT EXISTS backend.roles_permissions (
   role_id UUID NOT NULL REFERENCES backend.roles(id) ON DELETE CASCADE,
