@@ -27,8 +27,8 @@ CREATE TABLE IF NOT EXISTS backend.roles (
 -- +endmigration
 
 -- +migration: create_user_roles_table
---+ dependency: create_roles_table
---+ dependency: create_user_table
+-- +dependency: create_roles_table
+-- +dependency: create_user_table
 --+ Tabela utilizada para armazenar a relação entre usuários e papéis (roles)
 CREATE TABLE IF NOT EXISTS backend.user_roles (
   user_id UUID NOT NULL REFERENCES backend.users(id) ON DELETE CASCADE,
