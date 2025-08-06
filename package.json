@@ -7,7 +7,9 @@
   "scripts": {
     "test": "vitest",
     "coverage": "vitest run --coverage",
-    "build": "tsc --project tsconfig.json"
+    "build": "tsc --project tsconfig.json",
+    "migrate": "node dist/main.js",
+    "migrate:dev": "tsc --project tsconfig.json && ts-node dist/main.js"
   },
   "keywords": [],
   "author": "",
@@ -17,10 +19,12 @@
     "@types/node": "^24.2.0",
     "@types/pg": "^8.15.5",
     "@vitest/coverage-v8": "^3.2.4",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   },
   "dependencies": {
+    "dotenv": "^17.2.1",
     "pg": "^8.16.3"
   }
 }
