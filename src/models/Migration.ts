@@ -8,33 +8,47 @@ export default class Migration {
   public readonly serial: number;
   public readonly startLine: number;
   public endLine?: number | null;
-  private dependencies: string[];
-  private tags: MigrationTags[] = [];
-  private _description: string;
-  private sql: string;
+  private _migrationDependencies: string[] = [];
+  private _groupDependencies: string[] = [];
+  private _tags: Set<MigrationTags> = new Set<MigrationTags>();
+  private _description: string = '';
+  public sql: string = '';
 
   constructor(
     filePath: string,
     name: string,
     serial: number,
-    sql: string,
-    startLine: number,
-    endLine?: number,
-    description?: string | null,
-    depedencies: string[] = []
+    startLine: number
   ) {
     this.filePath = filePath;
     this.name = name;
     this.serial = serial;
-    this.sql = sql;
     this.startLine = startLine;
-    this.endLine = endLine ?? null;
-    this._description = description ?? '';
-    this.dependencies = depedencies;
+  }
+
+  public get tags(): Readonly<Set<MigrationTags>> {
+    return this._tags;
   }
 
   public get description(): string {
     return this._description;
+  }
+
+  public addTags(tags: MigrationTags[]): void {
+    if(!tags || tags.length === 0) {
+      console.warn('Attempted to add an empty tag to migration:', this.name);
+      return;
+    }
+
+    for (const tag of tags) {
+      if (this._tags.has(tag)) {
+        console.warn(`Tag ${tag} already exists in migration:`, this.name);
+      }
+    }
+
+    for (const tag of tags) {
+      this._tags.add(tag);
+    }
   }
 
   public addToDescription(description: string): void {
@@ -42,11 +56,11 @@ export default class Migration {
       console.warn('Attempted to add empty description to migration:', this.name);
       return;
     }
-    this._description += `\n${description.trim()}`;
-  }
-
-  public get sqlContent(): Readonly<string> {
-    return this.sql;
+    if (this._description.length === 0) {
+      this._description = description.trim();
+    } else {
+      this._description += `\n${description.trim()}`;
+    }
   }
 
   public addToSql(sql: string): void {
@@ -57,34 +71,36 @@ export default class Migration {
     this.sql += `\n${sql}`;
   }
 
-  public addDependency(dependency: string): void {
+  public addMigrationDependency(dependency: string): void {
     if (!dependency || dependency.trim().length === 0) {
       console.warn('Attempted to add empty dependency to migration:', this.name);
       return;
     }
-    this.dependencies.push(dependency);
+    this._migrationDependencies.push(dependency);
+  }
+
+  public addGroupDependency(dependency: string): void {
+    if (!dependency || dependency.trim().length === 0) {
+      console.warn('Attempted to add empty group dependency to migration:', this.name);
+      return;
+    }
+    this._groupDependencies.push(dependency);
   }
 
   public static async create(
     filePath: string, 
     name: string, 
-    serial: number, 
-    sql: string,
+    serial: number,
     startLine: number,
-    endLine?: number,
-    description?: string | null,
-    dependencies: string[] = [],
     skipFileCheck: boolean = false
   ): Promise<Migration> {
-    if (!filePath || !name || serial < 0 || !sql || startLine < 0) {
+    if (!filePath || !name || serial < 0 || startLine < 0) {
       console.group('Migration creation error');
       console.error('Invalid parameters for Migration creation:');
       console.error(`filePath: ${filePath}`);
       console.error(`name: ${name}`);
       console.error(`serial: ${serial}`);
-      console.error(`sql: ${sql}`);
       console.error(`startLine: ${startLine}`);
-      console.error(`endLine: ${endLine}`);
       console.groupEnd();
       throw new Error('Invalid parameters for Migration creation');
     }
@@ -96,13 +112,9 @@ export default class Migration {
 
     return new Migration(
       filePath, 
-      name, 
-      serial, 
-      sql, 
-      startLine, 
-      endLine, 
-      description,
-      dependencies
+      name,
+      serial,
+      startLine
     );
   }
 
@@ -113,6 +125,16 @@ export default class Migration {
            this.startLine === other.startLine &&
            this.endLine === other.endLine &&
            this._description === other._description &&
-           this.sql === other.sql;
+           this.sql === other.sql &&
+           this._migrationDependencies.join(',') === other._migrationDependencies.join(',') &&
+            this._groupDependencies.join(',') === other._groupDependencies.join(',');
+  }
+
+  public get migrationDependencies(): Readonly<string[]> {
+    return this._migrationDependencies;
+  }
+
+  public get groupDependencies(): Readonly<string[]> {
+    return this._groupDependencies;
   }
 }
