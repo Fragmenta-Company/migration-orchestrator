@@ -1,3 +1,15 @@
+-- +migration: create_user_roles_table
+-- +dependency: create_roles_table
+-- +dependency: create_user_table
+--+ Tabela utilizada para armazenar a relação entre usuários e papéis (roles)
+CREATE TABLE IF NOT EXISTS backend.user_roles (
+  user_id UUID NOT NULL REFERENCES backend.users(id) ON DELETE CASCADE,
+  role_id UUID NOT NULL REFERENCES backend.roles(id) ON DELETE CASCADE,
+  PRIMARY KEY (user_id, role_id),
+  created_at TIMESTAMP NOT NULL DEFAULT now()
+);
+-- +endmigration
+
 -- +migration: create_user_table
 --+ Tabela utilizada para armazenar os usuários do sistema
 CREATE TABLE IF NOT EXISTS backend.users (
@@ -16,6 +28,7 @@ CREATE TABLE IF NOT EXISTS backend.users (
 -- +endmigration
 
 -- +migration: create_roles_table
+-- +dependency: create_user_table
 --+ Tabela utilizada para armazenar os papéis (roles) dos usuários
 CREATE TABLE IF NOT EXISTS backend.roles (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -23,18 +36,6 @@ CREATE TABLE IF NOT EXISTS backend.roles (
   description VARCHAR(1024) NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT now(),
   updated_at TIMESTAMP NOT NULL DEFAULT now()
-);
--- +endmigration
-
--- +migration: create_user_roles_table
--- +dependency: create_roles_table
--- +dependency: create_user_table
---+ Tabela utilizada para armazenar a relação entre usuários e papéis (roles)
-CREATE TABLE IF NOT EXISTS backend.user_roles (
-  user_id UUID NOT NULL REFERENCES backend.users(id) ON DELETE CASCADE,
-  role_id UUID NOT NULL REFERENCES backend.roles(id) ON DELETE CASCADE,
-  PRIMARY KEY (user_id, role_id),
-  created_at TIMESTAMP NOT NULL DEFAULT now()
 );
 -- +endmigration
 
@@ -54,6 +55,7 @@ CREATE TABLE IF NOT EXISTS backend.permissions (
 
 -- +migration: create_roles_permissions_table
 -- +dependency: create_permissions_table
+-- +dependency: create_roles_table
 --+ Tabela utilizada para armazenar a relação entre papéis (roles) e permissões
 CREATE TABLE IF NOT EXISTS backend.roles_permissions (
   role_id UUID NOT NULL REFERENCES backend.roles(id) ON DELETE CASCADE,
