@@ -7,7 +7,7 @@ import runSingleSqlFile from "./commands/run_single_sql_file.js";
 import runSqlFromDirectory from "./commands/run_sql_from_directory.js";
 import ExitCodes from "./migration_worker/ExitCodes.js";
 import fileExists from "./utils/file_exists.js";
-import timedAsync from "./utils/timedAsync.js";
+import timed_async from "./utils/timed_async.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.join(path.dirname(__filename), "..");
@@ -29,7 +29,7 @@ program
     const fullPath = path.isAbsolute(directory)
       ? directory
       : path.join(process.cwd(), directory);
-    await timedAsync(
+    await timed_async(
       runSqlFromDirectory,
       fullPath,
       options?.showResults || false,
@@ -48,7 +48,7 @@ program
       console.error(`File not found: ${fullPath}`);
       process.exit(ExitCodes.ERROR);
     }
-    await timedAsync(runSingleSqlFile, fullPath, options?.showResults || false);
+    await timed_async(runSingleSqlFile, fullPath, options?.showResults || false);
   });
 
 await program.parseAsync();

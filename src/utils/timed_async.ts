@@ -1,4 +1,4 @@
-export default async function timedAsync<T, Args extends unknown[]>(
+export default async function timed_async<T, Args extends unknown[]>(
   fn: (...args: Args) => Promise<T> | T,
   ...args: Args
 ): Promise<T> {
