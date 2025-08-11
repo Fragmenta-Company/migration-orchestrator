@@ -1,46 +1,54 @@
-import getSqlFilePaths from "./get_sql_filepaths.js";
-import { fileURLToPath } from 'url';
-import path from 'path';
-import SqlLoader from "./sql_loader.js";
-import MigrationParser from "./migration_parser.js";
-import MigrationRunner from "./migration_runner.js";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import "dotenv/config";
-import createDependencyGraph from "./utils/createDependencyGraph.js";
-import { organizeMigrations } from "./utils/organizeMigrations.js";
-import chalk from "chalk";
+import fs from "node:fs";
+import { program } from "commander";
+import runSingleSqlFile from "./commands/run_single_sql_file.js";
+import runSqlFromDirectory from "./commands/run_sql_from_directory.js";
+import ExitCodes from "./migration_worker/ExitCodes.js";
+import fileExists from "./utils/file_exists.js";
+import timedAsync from "./utils/timedAsync.js";
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.join(path.dirname(__filename), "..");
+const packageJson = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "package.json"), "utf-8"),
+);
+const programName = "Migration Orchestrator";
 
-const files = await getSqlFilePaths(path.join(__dirname + "/../src-sql"));
-const loader = await SqlLoader.create(files.map(f => path.join(f.parentPath, f.name)));
+program
+  .name(programName)
+  .description(packageJson.description)
+  .version(`${programName} v${packageJson.version}`);
 
-const migrations = await (new MigrationParser).parseMultipleFiles(loader.sqlFiles);
-
-const dependencyGraph = createDependencyGraph(migrations);
-
-const organizedMigrations = organizeMigrations(dependencyGraph, migrations);
-
-// console.dir(migrations, { depth: null });
-//
-// console.dir(dependencyGraph, { depth: null });
-//
-// console.dir(organizedMigrations, { depth: 2 });
-
-const migration_runner = new MigrationRunner(true);
-
-if (organizedMigrations.success) {
-  const success = await migration_runner.runMigrations(organizedMigrations.migrations);
-
-  if (success) {
-    console.log("All migrations ran successfully.");
-  } else {
-    console.error("Some migrations failed. Please check the logs for details.");
-  }
-
-  await migration_runner.close();
-} else {
-  organizedMigrations.errors.forEach(error => {
-    console.error(chalk.red(`Error organizing migrations: `), `\n${error.message} at line ${error.line}`);
+program
+  .command("from-dir <directory>")
+  .description("Run SQL migrations from a specified directory")
+  .option("-s, --show-results", "Show results of each migration", false)
+  .action(async (directory: string, options) => {
+    const fullPath = path.isAbsolute(directory)
+      ? directory
+      : path.join(process.cwd(), directory);
+    await timedAsync(
+      runSqlFromDirectory,
+      fullPath,
+      options?.showResults || false,
+    );
   });
-}
+
+program
+  .command("from-file <filePath>")
+  .description("Run a single SQL file")
+  .option("-s, --show-results", "Show results of the migration", false)
+  .action(async (filePath: string, options) => {
+    const fullPath = path.isAbsolute(filePath)
+      ? filePath
+      : path.join(process.cwd(), filePath);
+    if (!(await fileExists(fullPath))) {
+      console.error(`File not found: ${fullPath}`);
+      process.exit(ExitCodes.ERROR);
+    }
+    await timedAsync(runSingleSqlFile, fullPath, options?.showResults || false);
+  });
+
+await program.parseAsync();
