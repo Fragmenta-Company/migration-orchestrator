@@ -34,7 +34,7 @@ How to start using it:
 3. Define dependencies in your migration files using comments, e.g.:
     ```sql
     -- +migration: add_email_to_users
-    -- +dependency: create_users
+    -- +dependency: ::create_users.sql::create_users
     --+ This migration adds an email column to the users table.
     ALTER TABLE users ADD COLUMN email TEXT;
     -- +endmigration
