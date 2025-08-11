@@ -1,6 +1,5 @@
-
 enum MigrationTags {
-  CONCURRENT = 'concurrent',
+  CONCURRENT = "concurrent",
 }
 
 export default MigrationTags;

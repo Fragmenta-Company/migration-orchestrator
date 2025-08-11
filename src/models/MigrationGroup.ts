@@ -7,7 +7,9 @@ interface MigrationGroupIterator {
   currentGroup: string;
 }
 
-export default class MigrationGroup implements Iterable<MigrationGroupIterator> {
+export default class MigrationGroup
+  implements Iterable<MigrationGroupIterator>
+{
   private _migrations: Migration[] = [];
   private _migrationGroups: MigrationGroup[] = [];
   private _name: string;
@@ -15,7 +17,7 @@ export default class MigrationGroup implements Iterable<MigrationGroupIterator> 
   private _groupTags: Set<MigrationGroupTags> = new Set<MigrationGroupTags>();
   private _groupGroupDependencies: Set<string> = new Set<string>();
   private _groupMigrationDependencies: Set<string> = new Set<string>();
-  private _description: string = '';
+  private _description: string = "";
   public readonly startLine: number;
   public endLine?: number | null = null;
 
@@ -27,10 +29,10 @@ export default class MigrationGroup implements Iterable<MigrationGroupIterator> 
 
   public *[Symbol.iterator](): IterableIterator<MigrationGroupIterator> {
     for (const migration of this._migrations) {
-      yield { 
+      yield {
         migration,
         currentGroup: this._name,
-        migrationName: migration.name 
+        migrationName: migration.name,
       };
     }
 
@@ -45,7 +47,7 @@ export default class MigrationGroup implements Iterable<MigrationGroupIterator> 
 
   public addMigration(migration: Migration): void {
     if (!migration) {
-      console.warn('Attempted to add a null migration to group:', this._name);
+      console.warn("Attempted to add a null migration to group:", this._name);
       return;
     }
     this._migrations.push(migration);
@@ -53,7 +55,7 @@ export default class MigrationGroup implements Iterable<MigrationGroupIterator> 
 
   public addGroup(group: MigrationGroup): void {
     if (!group) {
-      console.warn('Attempted to add a null group to group:', this._name);
+      console.warn("Attempted to add a null group to group:", this._name);
       return;
     }
     this._migrationGroups.push(group);
@@ -61,13 +63,19 @@ export default class MigrationGroup implements Iterable<MigrationGroupIterator> 
 
   public addTags(tags: MigrationGroupTags[]): void {
     if (!tags || tags.length === 0) {
-      console.warn('Attempted to add an empty tag to migration group:', this._name);
+      console.warn(
+        "Attempted to add an empty tag to migration group:",
+        this._name,
+      );
       return;
     }
 
     for (const tag of tags) {
       if (this._groupTags.has(tag)) {
-        console.warn(`Tag ${tag} already exists in migration group:`, this._name);
+        console.warn(
+          `Tag ${tag} already exists in migration group:`,
+          this._name,
+        );
       }
     }
 
@@ -78,7 +86,10 @@ export default class MigrationGroup implements Iterable<MigrationGroupIterator> 
 
   public addGroupDependency(groupName: string): void {
     if (!groupName || groupName.trim().length === 0) {
-      console.warn('Attempted to add an empty group dependency to group:', this._name);
+      console.warn(
+        "Attempted to add an empty group dependency to group:",
+        this._name,
+      );
       return;
     }
     this._groupGroupDependencies.add(groupName);
@@ -86,7 +97,10 @@ export default class MigrationGroup implements Iterable<MigrationGroupIterator> 
 
   public addMigrationDependency(migrationName: string): void {
     if (!migrationName || migrationName.trim().length === 0) {
-      console.warn('Attempted to add an empty migration dependency to group:', this._name);
+      console.warn(
+        "Attempted to add an empty migration dependency to group:",
+        this._name,
+      );
       return;
     }
     this._groupMigrationDependencies.add(migrationName);
@@ -94,7 +108,10 @@ export default class MigrationGroup implements Iterable<MigrationGroupIterator> 
 
   public addToDescription(description: string): void {
     if (!description || description.trim().length === 0) {
-      console.warn('Attempted to add empty description to migration group:', this._name);
+      console.warn(
+        "Attempted to add empty description to migration group:",
+        this._name,
+      );
       return;
     }
     if (this._description.length === 0) {
