@@ -1,25 +1,23 @@
-import fs from "fs/promises";
+import fs from "node:fs/promises";
 import fileExists from "./utils/file_exists.js";
 
 export default class SqlLoader {
-
   private _sqlFiles: Map<string, string> = new Map();
-
-  constructor() {}
 
   public static async create(filePaths: string[]): Promise<SqlLoader> {
     const loader = new SqlLoader();
     const results = await loader.loadSqlFiles(filePaths);
 
     results
-      .filter(result => !result.success)
-      .forEach(r => {
+      .filter((result) => !result.success)
+      .forEach((r) => {
         console.warn(
           `Failed to load SQL file: ${r.fileName}\n`,
-          r?.error?.message, r?.error?.stack
+          r?.error?.message,
+          r?.error?.stack,
         );
-      })
-    
+      });
+
     return loader;
   }
 
@@ -27,21 +25,35 @@ export default class SqlLoader {
     return this._sqlFiles;
   }
 
-  private async loadSqlFiles(filePaths: string[]): Promise<{
-    fileName: string;
-    error?: {
-      message: string;
-      stack?: string | undefined;
-    };
-    success: boolean;
-  }[]> {
-    const results = await Promise.all(filePaths.map(async (filePath) => {
-      const result = await this.loadSqlFile(filePath);
-      return {
-        fileName: filePath,
-        ...result,
+  public popFirstSqlFile(): { fileName: string; content: string } | null {
+    const firstKey = this._sqlFiles.keys().next().value;
+    if (firstKey) {
+      const content = this._sqlFiles.get(firstKey) ?? "";
+      this._sqlFiles.delete(firstKey);
+      return { fileName: firstKey, content };
+    }
+    return null;
+  }
+
+  private async loadSqlFiles(filePaths: string[]): Promise<
+    {
+      fileName: string;
+      error?: {
+        message: string;
+        stack?: string | undefined;
       };
-    }));
+      success: boolean;
+    }[]
+  > {
+    const results = await Promise.all(
+      filePaths.map(async (filePath) => {
+        const result = await this.loadSqlFile(filePath);
+        return {
+          fileName: filePath,
+          ...result,
+        };
+      }),
+    );
 
     return results;
   }
@@ -68,14 +80,11 @@ export default class SqlLoader {
 
       const sqlContent = await fs.readFile(filePath, "utf-8");
 
-      this._sqlFiles.set(
-        filePath,
-        sqlContent
-      );
+      this._sqlFiles.set(filePath, sqlContent);
 
       return {
         success: true,
-      }
+      };
     } catch (e) {
       console.error(`Error loading SQL file: ${filePath}`, e);
       return {
@@ -83,7 +92,7 @@ export default class SqlLoader {
         error: {
           message: e instanceof Error ? e.message : String(e),
           stack: e instanceof Error ? e.stack : undefined,
-        }
+        },
       };
     }
   }
