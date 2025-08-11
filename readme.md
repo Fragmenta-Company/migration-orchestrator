@@ -35,12 +35,15 @@ How to start using it:
    ```sql
     -- +migration: add_email_to_users
     -- +dependency: create_users
+    --+ This migration adds an email column to the users table.
    ALTER TABLE users ADD COLUMN email TEXT;
+   -- +endmigration
    ```
    This will ensure that the `create_users` migration is run before this one.
 
    ```sql
     -- +migration: create_users
+    --+ This migration creates the users table.
     CREATE TABLE users (id SERIAL PRIMARY KEY, name TEXT);
     -- +endmigration
    ```
