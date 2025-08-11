@@ -1,8 +1,10 @@
-import { type Dirent } from 'fs';
-import fs from 'fs/promises';
-import path from 'path';
+import type { Dirent } from "node:fs";
+import fs from "node:fs/promises";
+import path from "node:path";
 
-export default async function getSqlFilePaths(root_directory: string): Promise<Dirent[]> {
+export default async function getSqlFilePaths(
+  root_directory: string,
+): Promise<Dirent[]> {
   const files = await fs.readdir(root_directory, {
     withFileTypes: true,
   });
@@ -11,19 +13,18 @@ export default async function getSqlFilePaths(root_directory: string): Promise<D
     await Promise.all(
       files
         .sort((a, b) => a.name.localeCompare(b.name))
-        .map(file => {
+        .map((file) => {
           const filePath = path.join(root_directory, file.name);
           if (file.isDirectory()) {
             return getSqlFilePaths(filePath);
           } else {
             return file;
           }
-        })
+        }),
     )
   )
     .flat()
-    .filter(f => f.isFile());
+    .filter((f) => f.isFile());
 
   return allFiles;
 }
-
