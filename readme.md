@@ -32,21 +32,21 @@ How to start using it:
 1. Create a directory for your migrations, e.g., `migrations/`.
 2. Create migration files in that directory, e.g., `migrations/create_users.sql`, `migrations/add_email_to_users.sql`, etc.
 3. Define dependencies in your migration files using comments, e.g.:
-   ```sql
+    ```sql
     -- +migration: add_email_to_users
     -- +dependency: create_users
     --+ This migration adds an email column to the users table.
-   ALTER TABLE users ADD COLUMN email TEXT;
-   -- +endmigration
-   ```
-   This will ensure that the `create_users` migration is run before this one.
+    ALTER TABLE users ADD COLUMN email TEXT;
+    -- +endmigration
+    ```
+    This will ensure that the `create_users` migration is run before this one.
 
-   ```sql
+    ```sql
     -- +migration: create_users
     --+ This migration creates the users table.
     CREATE TABLE users (id SERIAL PRIMARY KEY, name TEXT);
     -- +endmigration
-   ```
+    ```
 4. Run the migration orchestrator using the command above.
 
 # Features to be added
