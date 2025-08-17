@@ -1,33 +1,33 @@
 
-# Fragmenta's SQL Migration Format (SQL Extended or SQLX)
+# Fragmenta's SQL Migration Format (FSQL)
 
 This document describes the SQL migration format used for managing database schema changes. The format allows for easy tracking, versioning, and execution of migrations in a structured manner.
 
-## How to start using the SQLX format?
+## How to start using the FSQL format?
 First you need to create a new directory for your migrations, and then create files with the `.sql` extension inside that directory. Each file can contain multiple migrations, groups, functions, and macros.
 The migration tool will automatically detect the files and execute the migrations in the correct order based on their dependencies and the order they are defined in the file.
 
-After creating the first file you have the option to define the version of sqlx to use at the top of the file, this is optional and will default to the latest version if not specified.
+After creating the first file you have the option to define the version of fsql to use at the top of the file, this is optional and will default to the latest version if not specified.
 ```sql
--- +sqlx:version: 0.1
+-- +fsql:version: 0.1
 ```
 
 Multiple files can have multiple versions, but it is recommended to keep the version consistent across all files to avoid confusion. The version can be used to ensure that the migration tool is using the correct syntax and features for the migrations defined in the file.
 The migration tool will automatically detect the version and apply the correct syntax and features based on the version specified at the top of the file.
 
-## What SQLX will do to my database?
-The SQLX format is designed to be a kind of superset of SQL that allows for more advanced features and better organization of migrations. It will not change the underlying SQL syntax (if not necessary), but it will add additional directives and features to make migrations more manageable and easier to read.
-The SQLX format will:
+## What FSQL will do to my database?
+The FSQL format is designed to be a kind of superset of SQL that allows for more advanced features and better organization of migrations. It will not change the underlying SQL syntax (if not necessary), but it will add additional directives and features to make migrations more manageable and easier to read.
+The FSQL format will:
 - Allow for grouping migrations together for better organization.
 - Support dependencies between migrations and groups to ensure correct execution order.
 - Enable the definition of macros and functions to encapsulate reusable SQL logic.
 - Provide a way to define rollback statements for migrations to revert changes if needed.
 - Allow for tagging migrations and groups for special processing or categorization.
 
-SQLX files are still valid SQL files, note that if you try to run a SQL file containing SQLX directives in a standard SQL environment, it will likely result in syntax errors. The SQLX format is intended to be used with a migration tool that understands and processes these directives.
+FSQL files are still valid SQL files, note that if you try to run a SQL file containing FSQL directives in a standard SQL environment, it will likely result in syntax errors. The FSQL format is intended to be used with a migration tool that understands and processes these directives.
 Even if the syntax doesn't derive much in the file you created, you have to remember that the migration tool will organize the migrations before executing them, so the order of the migrations will be preserved and executed in the correct order based on their dependencies and the order they are defined in the file.
 
-Also note that the SQLX format is designed to be compatible with PostgreSQL mainly.
+Also note that the FSQL format is designed to be compatible with PostgreSQL mainly.
 
 While running the migration tool, it will create a new table in your database called `migrations` to keep track of the migrations that have been executed. This table will contain the following columns:
 - `id`: The unique identifier for the migration.

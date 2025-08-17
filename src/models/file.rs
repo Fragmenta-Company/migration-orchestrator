@@ -14,7 +14,7 @@ const REGEX_MACRO_START: &str = r"-- \+macro: (\w+)";
 const REGEX_MACRO_END: &str = r"-- \+endmacro";
 const REGEX_FUNCTION_START: &str = r"-- \+function: (\w+)";
 const REGEX_FUNCTION_END: &str = r"-- \+endfunction";
-const REGEX_SQLX_VERSION: &str = r"-- \+sqlx:version: (\d+\.\d+)";
+const REGEX_FSQL_VERSION: &str = r"-- \+fsql:version: (\d+\.\d+)";
 const REGEX_MIGRATION_GROUP: &str = r"-- \+group: (\w+)";
 const REGEX_MIGRATION_GROUP_END: &str = r"-- \+endgroup";
 const REGEX_NUCLEAR: &str = r"-- \+nuclear";
@@ -46,7 +46,7 @@ pub struct MigrationFile {
     pub migration_groups: Vec<MigrationGroup>,
     pub macros: Vec<MacroFunc>,
     pub functions: Vec<Function>,
-    pub sqlx_version: Option<String>,
+    pub fsql_version: Option<String>,
 }
 
 impl MigrationFile {
@@ -218,8 +218,8 @@ impl MigrationFile {
             regex::Regex::new(REGEX_FUNCTION_START).expect("Invalid regex for function");
         let regex_function_end =
             regex::Regex::new(REGEX_FUNCTION_END).expect("Invalid regex for function end");
-        let regex_sqlx_version =
-            regex::Regex::new(REGEX_SQLX_VERSION).expect("Invalid regex for SQLx version");
+        let regex_fsql_version =
+            regex::Regex::new(REGEX_FSQL_VERSION).expect("Invalid regex for FSQL version");
         let regex_migration_group_start =
             regex::Regex::new(REGEX_MIGRATION_GROUP).expect("Invalid regex for migration group");
         let regex_migration_group_end = regex::Regex::new(REGEX_MIGRATION_GROUP_END)
@@ -411,9 +411,9 @@ impl MigrationFile {
                 } else {
                     buffer.push_str(caps.get(1).map_or("", |m| m.as_str()));
                 }
-            } else if let Some(caps) = regex_sqlx_version.captures(line) {
+            } else if let Some(caps) = regex_fsql_version.captures(line) {
                 if let Some(version) = caps.get(1) {
-                    self.sqlx_version = Some(version.as_str().trim().to_string());
+                    self.fsql_version = Some(version.as_str().trim().to_string());
                 }
             } else if let Some(caps) = regex_migration_start.captures(line) {
                 if current_migration.take().is_some() {

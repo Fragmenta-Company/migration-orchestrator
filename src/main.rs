@@ -13,7 +13,7 @@ async fn main() {
         "path/to/file.sql",
         "file.sql",
         r#"
-            -- +sqlx:version: 0.5
+            -- +fsql:version: 0.5
 
             -- +migration: smth
             -- +version: 1.0.0
