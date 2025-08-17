@@ -1,0 +1,14 @@
+[package]
+name = "ontime-migrations-rust"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1.47.1", features = ["macros", "fs", "time", "io-std", "io-util", "net", "process", "rt-multi-thread"] }
+sqlx = { version = "0.8.6", features = ["time", "json", "postgres", "derive", "macros", "uuid", "chrono", "regexp", "runtime-tokio"] }
+dotenvy = "0.15.7"
+colored = "3.0.0"
+clap = { version = "4.5.44", features = ["derive", "cargo", "color"] }
+regex = "1.11.1"
+ts-rs = "11.0.1"
+rquickjs = { version = "0.9.0", features = ["macro", "futures", "loader"] }
